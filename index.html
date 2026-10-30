@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuestionario Interactivo: Logros de Lectura y Escritura</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .font-heading {
+      font-family: 'Fredoka', cursive;
+    }
+
+    /* Animations */
+    .fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .bounce-in {
+      animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounceIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      70% { opacity: 1; transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .option-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center p-4 sm:p-6 md:p-8">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-2xl glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden my-auto">
+    
+    <!-- Top Decorative Elements -->
+    <div class="absolute -top-12 -right-12 w-32 h-32 bg-yellow-300 rounded-full blur-2xl opacity-50"></div>
+    <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-pink-400 rounded-full blur-2xl opacity-50"></div>
+
+    <!-- Header Section -->
+    <header class="text-center mb-6 relative z-10">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-amber-400 to-pink-500 rounded-2xl shadow-lg mb-3 text-white text-3xl transform -rotate-3">
+        <i class="fa-solid fa-book-open"></i>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold font-heading text-slate-800 tracking-wide">
+        Desafío de Lectura y Escritura
+      </h1>
+      <p class="text-slate-500 text-sm sm:text-base mt-1 font-medium">
+        ¡Demuestra y fortalece tus competencias lectoras!
+      </p>
+    </header>
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="text-center py-6 fade-in relative z-10">
+      <div class="bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-6 mb-8 text-left space-y-3">
+        <h3 class="font-bold text-indigo-900 text-lg flex items-center gap-2">
+          <i class="fa-solid fa-star text-amber-500"></i> ¿Qué evaluaremos hoy?
+        </h3>
+        <ul class="text-slate-600 text-sm sm:text-base space-y-2 font-medium">
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Conciencia fonológica</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Comprensión lectora implícita y explícita</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Fluidez y entonación</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Vocabulario y riqueza léxica</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Cohesión y producción escrita</li>
+        </ul>
+      </div>
+
+      <button id="start-btn" class="w-full py-4 px-8 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+        ¡Comenzar el Cuestionario! <i class="fa-solid fa-arrow-right ml-2"></i>
+      </button>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="hidden relative z-10">
+      
+      <!-- Progress Bar & Question Counter -->
+      <div class="mb-6">
+        <div class="flex justify-between items-center mb-2">
+          <span id="question-count" class="text-xs sm:text-sm font-bold text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">
+            Pregunta 1 de 5
+          </span>
+          <span id="score-live" class="text-xs sm:text-sm font-bold text-amber-600 bg-amber-100 px-3 py-1 rounded-full">
+            <i class="fa-solid fa-trophy mr-1"></i> Puntos: 0
+          </span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200">
+          <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="mb-6 fade-in">
+        <span id="category-badge" class="inline-block text-xs font-semibold px-2.5 py-1 rounded-md mb-2 bg-pink-100 text-pink-700">
+          Categoría
+        </span>
+        <h2 id="question-text" class="text-lg sm:text-xl font-bold text-slate-800 leading-snug">
+          Cargando pregunta...
+        </h2>
+      </div>
+
+      <!-- Options List -->
+      <div id="options-container" class="space-y-3 mb-6">
+        <!-- Las opciones se generan dinámicamente -->
+      </div>
+
+      <!-- Feedback Explanation Box -->
+      <div id="feedback-box" class="hidden rounded-2xl p-4 mb-6 text-sm font-medium fade-in border-2">
+        <div class="flex items-start gap-3">
+          <div id="feedback-icon" class="text-2xl mt-0.5"></div>
+          <div>
+            <h4 id="feedback-title" class="font-bold text-base mb-1"></h4>
+            <p id="feedback-text" class="leading-relaxed"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Question Button -->
+      <button id="next-btn" class="hidden w-full py-3.5 px-6 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+        <span>Siguiente Pregunta</span>
+        <i class="fa-solid fa-chevron-right text-sm"></i>
+      </button>
+
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="result-screen" class="hidden text-center py-4 fade-in relative z-10">
+      
+      <div id="result-badge" class="w-24 h-24 mx-auto rounded-full bg-amber-100 text-amber-500 flex items-center justify-center text-5xl mb-4 bounce-in shadow-inner">
+        <i class="fa-solid fa-award"></i>
+      </div>
+
+      <h2 id="result-title" class="text-2xl sm:text-3xl font-extrabold font-heading text-slate-800 mb-2">
+        ¡Excelente Trabajo!
+      </h2>
+
+      <p id="result-subtitle" class="text-slate-600 font-medium mb-6">
+        Has completado la evaluación sobre logros de lectura y escritura.
+      </p>
+
+      <!-- Score Box -->
+      <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-2xl shadow-xl mb-6">
+        <span class="text-xs uppercase tracking-wider opacity-80 font-bold">Puntaje Final</span>
+        <div class="text-4xl sm:text-5xl font-extrabold font-heading my-1">
+          <span id="final-score">0</span> / <span id="total-score">5</span>
+        </div>
+        <p id="score-percentage" class="text-sm font-medium text-indigo-100">Efectividad: 0%</p>
+      </div>
+
+      <!-- Performance Message -->
+      <div id="performance-message" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-6 text-slate-700 text-sm sm:text-base font-medium">
+        ...
+      </div>
+
+      <!-- Restart Button -->
+      <button id="restart-btn" class="w-full py-4 px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+        <i class="fa-solid fa-rotate-right mr-2"></i> Intentar de nuevo
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // Bank of Questions - Logros de lectura y escritura
+    const questions = [
+      {
+        category: "Conciencia Fonológica",
+        question: "¿Qué habilidad demuestra un estudiante que reconoce que la palabra 'GATO' termina con el mismo sonido que 'PATO'?",
+        options: [
+          "Comprensión inferencial",
+          "Rima y conciencia aliterativa",
+          "Decodificación sintáctica",
+          "Fluidez lectora avanzada"
+        ],
+        correct: 1,
+        explanation: "¡Correcto! Identificar patrones de sonido finales es parte clave de la conciencia fonológica (rima), un pilar predictivo fundamental en el aprendizaje inicial de la lectura."
+      },
+      {
+        category: "Comprensión Lectora",
+        question: "Si en un texto dice: 'Pedro olvidó su paraguas y llegó con la ropa empapada al colegio', ¿qué tipo de comprensión aplicas para saber por qué se mojó?",
+        options: [
+          "Lectura crítica o evaluativa",
+          "Comprensión literal",
+          "Comprensión inferencial",
+          "Decodificación directa"
+        ],
+        correct: 2,
+        explanation: "¡Muy bien! Es una inferencia. El texto no dice explícitamente 'llovió', pero unes la pista del paraguas y la ropa empapada para deducir la causa."
+      },
+      {
+        category: "Fluidez Lectora",
+        question: "¿Cuáles son los tres componentes principales que integran la fluidez lectora?",
+        options: [
+          "Volumen alto, rapidez extrema y memoria",
+          "Precisión, velocidad adecuada y prosodia (expresividad)",
+          "Vocabulario amplio, ortografía y caligrafía",
+          "Silabeo, pausas largas y volumen bajo"
+        ],
+        correct: 1,
+        explanation: "¡Excelente! La fluidez lectora implica leer las palabras correctamente (precisión), a un ritmo natural (velocidad) y con la entonación y pausas adecuadas (prosodia)."
+      },
+      {
+        category: "Vocabulario",
+        question: "¿Cuál es una estrategia clave para ampliar el vocabulario comprensivo durante la lectura?",
+        options: [
+          "Saltarse las palabras desconocidas para no frenar la lectura",
+          "Deducir el significado por el contexto de la oración",
+          "Memoria fotográfica de todas las letras de la palabra",
+          "Reemplazar siempre la palabra por un dibujo"
+        ],
+        correct: 1,
+        explanation: "¡Correcto! El análisis del contexto permite al lector atribuir sentido a palabras desconocidas sin interrumpir la construcción global del significado."
+      },
+      {
+        category: "Expresión Escritural",
+        question: "Al redactar un cuento, ¿qué elemento asegura que las ideas estén conectadas lógicamente entre párrafos?",
+        options: [
+          "El uso adecuado de conectores textuales (ej: 'por lo tanto', 'luego')",
+          "Escribir únicamente frases cortas sin comas",
+          "Usar letras mayúsculas al inicio de cada palabra",
+          "Repetir el mismo sustantivo en todas las oraciones"
+        ],
+        correct: 0,
+        explanation: "¡Exacto! Los conectores textuales garantizan la cohesión y la coherencia en la expresión escrita, guiando al lector a través de las relaciones del pensamiento."
+      }
+    ];
+
+    // State Variables
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedOption = null;
+
+    // DOM Elements
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+
+    const startBtn = document.getElementById("start-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const restartBtn = document.getElementById("restart-btn");
+
+    const questionCount = document.getElementById("question-count");
+    const scoreLive = document.getElementById("score-live");
+    const progressBar = document.getElementById("progress-bar");
+    const categoryBadge = document.getElementById("category-badge");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+
+    const feedbackBox = document.getElementById("feedback-box");
+    const feedbackIcon = document.getElementById("feedback-icon");
+    const feedbackTitle = document.getElementById("feedback-title");
+    const feedbackText = document.getElementById("feedback-text");
+
+    // Event Listeners
+    startBtn.addEventListener("click", startQuiz);
+    nextBtn.addEventListener("click", goToNextQuestion);
+    restartBtn.addEventListener("click", startQuiz);
+
+    // Start Quiz Function
+    function startQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      
+      startScreen.classList.add("hidden");
+      resultScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+
+      updateScoreDisplay();
+      loadQuestion();
+    }
+
+    // Load Question
+    function loadQuestion() {
+      const q = questions[currentQuestionIndex];
+      selectedOption = null;
+
+      // Update Header Info
+      questionCount.textContent = `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`;
+      const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      categoryBadge.textContent = q.category;
+      questionText.textContent = q.question;
+
+      // Reset Feedback & Next Button
+      feedbackBox.classList.add("hidden");
+      nextBtn.classList.add("hidden");
+
+      // Generate Options
+      optionsContainer.innerHTML = "";
+      q.options.forEach((opt, index) => {
+        const btn = document.createElement("button");
+        btn.className = `option-btn w-full p-4 rounded-2xl border-2 border-slate-200 text-left font-semibold text-slate-700 bg-white hover:bg-slate-50 flex items-center justify-between gap-3 text-sm sm:text-base`;
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs shrink-0">
+              ${String.fromCharCode(65 + index)}
+            </span>
+            <span>${opt}</span>
+          </div>
+          <i class="fa-regular fa-circle text-slate-300 text-lg status-icon"></i>
+        `;
+        btn.addEventListener("click", () => selectOption(index, btn));
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    // Handle Option Selection
+    function selectOption(index, selectedBtn) {
+      if (selectedOption !== null) return; // Prevent multiple selects
+      selectedOption = index;
+
+      const q = questions[currentQuestionIndex];
+      const buttons = optionsContainer.querySelectorAll("button");
+
+      // Disable all buttons
+      buttons.forEach(btn => btn.disabled = true);
+
+      // Check correctness
+      const isCorrect = index === q.correct;
+      if (isCorrect) score++;
+
+      updateScoreDisplay();
+
+      // Style Options
+      buttons.forEach((btn, idx) => {
+        const statusIcon = btn.querySelector(".status-icon");
+
+        if (idx === q.correct) {
+          // Correct Answer Style
+          btn.classList.remove("border-slate-200", "bg-white");
+          btn.classList.add("border-emerald-500", "bg-emerald-50", "text-emerald-900");
+          statusIcon.className = "fa-solid fa-circle-check text-emerald-600 text-xl";
+        } else if (idx === index && !isCorrect) {
+          // Incorrect Answer Selected
+          btn.classList.remove("border-slate-200", "bg-white");
+          btn.classList.add("border-rose-400", "bg-rose-50", "text-rose-900");
+          statusIcon.className = "fa-solid fa-circle-xmark text-rose-500 text-xl";
+        }
+      });
+
+      // Show Feedback Box
+      feedbackBox.classList.remove("hidden", "bg-emerald-50", "border-emerald-200", "text-emerald-900", "bg-rose-50", "border-rose-200", "text-rose-900");
+
+      if (isCorrect) {
+        feedbackBox.classList.add("bg-emerald-50", "border-emerald-200", "text-emerald-900");
+        feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+        feedbackTitle.textContent = "¡Respuesta Correcta!";
+      } else {
+        feedbackBox.classList.add("bg-rose-50", "border-rose-200", "text-rose-900");
+        feedbackIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500"></i>`;
+        feedbackTitle.textContent = "¡Casi lo logras!";
+      }
+
+      feedbackText.textContent = q.explanation;
+      nextBtn.classList.remove("hidden");
+    }
+
+    // Go to Next Question or Results
+    function goToNextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    // Update Live Score Display
+    function updateScoreDisplay() {
+      scoreLive.innerHTML = `<i class="fa-solid fa-trophy mr-1"></i> Puntos: ${score}`;
+    }
+
+    // Show Final Results
+    function showResults() {
+      progressBar.style.width = `100%`;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+
+      const percentage = Math.round((score / questions.length) * 100);
+      document.getElementById("final-score").textContent = score;
+      document.getElementById("total-score").textContent = questions.length;
+      document.getElementById("score-percentage").textContent = `Efectividad: ${percentage}%`;
+
+      const resultBadge = document.getElementById("result-badge");
+      const resultTitle = document.getElementById("result-title");
+      const performanceMsg = document.getElementById("performance-message");
+
+      if (percentage === 100) {
+        resultBadge.className = "w-24 h-24 mx-auto rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center text-5xl mb-4 bounce-in shadow-inner";
+        resultBadge.innerHTML = `<i class="fa-solid fa-crown"></i>`;
+        resultTitle.textContent = "¡Extraordinario! Master en Lectura";
+        performanceMsg.innerHTML = "🌟 <strong>¡Desempeño Perfecto!</strong> Tienes un dominio sobresaliente de las habilidades de conciencia fonológica, comprensión, vocabulario y expresión escrita.";
+        launchConfetti();
+      } else if (percentage >= 60) {
+        resultBadge.className = "w-24 h-24 mx-auto rounded-full bg-amber-100 text-amber-500 flex items-center justify-center text-5xl mb-4 bounce-in shadow-inner";
+        resultBadge.innerHTML = `<i class="fa-solid fa-star"></i>`;
+        resultTitle.textContent = "¡Muy Buen Trabajo!";
+        performanceMsg.innerHTML = "👏 <strong>¡Buen dominio lectoescritor!</strong> Has demostrado una gran comprensión en la mayoría de las áreas evaluadas. ¡Sigue practicando para alcanzar la excelencia!";
+        launchConfetti();
+      } else {
+        resultBadge.className = "w-24 h-24 mx-auto rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center text-5xl mb-4 bounce-in shadow-inner";
+        resultBadge.innerHTML = `<i class="fa-solid fa-book-reader"></i>`;
+        resultTitle.textContent = "¡Buen Intento!";
+        performanceMsg.innerHTML = "📚 <strong>¡Sigue aprendiendo!</strong> Revisa las explicaciones de las preguntas y realiza el cuestionario nuevamente para afianzar tus competencias escritas y lectoras.";
+      }
+    }
+
+    // Confetti Effect
+    function launchConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
